@@ -1,5 +1,6 @@
-from os import environ
 from json import dumps
+from logging import getLogger
+from os import environ
 from uuid import uuid4
 
 from aiohttp import web
@@ -7,6 +8,7 @@ from aiohttp.web_exceptions import HTTPMethodNotAllowed
 
 from .models import Task
 
+logger = getLogger(__name__)
 PORT = environ['PORT']
 
 
@@ -14,6 +16,9 @@ class View:
     @classmethod
     async def dispatch(cls, request):
         method = getattr(cls, request.method.lower())
+        logger.info(
+            "Serving %s %s",
+            request.method, request.path)
 
         if not method:
             return HTTPMethodNotAllowed()
