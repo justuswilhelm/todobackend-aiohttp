@@ -21,3 +21,7 @@ class Task:
     @classmethod
     def set_object(cls, uuid, value):
         cls.db[uuid] = value
+
+    @classmethod
+    def update_object(cls, uuid, value):
+        cls.db[uuid].update(value)
