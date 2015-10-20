@@ -22,9 +22,7 @@ class View:
     async def dispatch(cls, request):
         view = cls(request)
         method = getattr(view, request.method.lower())
-        logger.info(
-            "Serving %s %s",
-            request.method, request.path)
+        logger.info("Serving %s %s", request.method, request.path)
 
         if not method:
             return HTTPMethodNotAllowed()
