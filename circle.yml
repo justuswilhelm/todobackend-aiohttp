@@ -2,7 +2,7 @@ machine:
   environment:
     SECRET_KEY: CI
   python:
-    version: 3.5
+    version: 3.5.0
 
 test:
   override:
