@@ -2,10 +2,10 @@
 
 ## Quickstart
 ```sh
-virtualenv env
+virtualenv env  # Make sure that the venv has Python 3.5.0
 source env/bin/activate
-pip install -r requirements
-python application.py
+pip install -r requirements.txt
+python run_server.py
 ```
 
 Upon successfully launching, you can open up http://www.todobackend.com/specs/index.html?http://localhost:8000 in your browser and test against a reference Todo-MVC implementation.
