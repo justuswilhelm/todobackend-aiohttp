@@ -15,9 +15,12 @@ class JSONResponse(Response):
 
 
 class View:
+    def __init__(self, request):
+        self.request = request
+
     @classmethod
     async def dispatch(cls, request):
-        view = cls()
+        view = cls(request)
         method = getattr(view, request.method.lower())
         logger.info(
             "Serving %s %s",
@@ -26,39 +29,40 @@ class View:
         if not method:
             return HTTPMethodNotAllowed()
 
-        return await method(request)
+        return await method()
 
-    @classmethod
-    async def options(self, request):
+    async def options(self):
         return Response()
 
 
 class IndexView(View):
-    async def get(self, request):
+    async def get(self):
         return JSONResponse(Task.all_objects())
 
-    async def post(self, request):
-        content = await request.json()
+    async def post(self):
+        content = await self.request.json()
         return JSONResponse(
             Task.create_object(content)
         )
 
-    async def delete(self, request):
+    async def delete(self):
         Task.delete_all_objects()
         return Response()
 
 
 class TodoView(View):
-    async def get(self, request):
-        uuid = request.match_info.get('uuid')
-        return JSONResponse(Task.get_object(uuid))
+    def __init__(self, request):
+        super().__init__(request)
+        self.uuid = request.match_info.get('uuid')
 
-    async def patch(self, request):
-        uuid = request.match_info.get('uuid')
-        content = await request.json()
-        return JSONResponse(Task.update_object(uuid, content))
+    async def get(self):
+        return JSONResponse(Task.get_object(self.uuid))
 
-    async def delete(self, request):
-        uuid = request.match_info.get('uuid')
-        Task.delete_object(uuid)
+    async def patch(self):
+        content = await self.request.json()
+        return JSONResponse(
+            Task.update_object(self.uuid, content))
+
+    async def delete(self):
+        Task.delete_object(self.uuid)
         return Response()
