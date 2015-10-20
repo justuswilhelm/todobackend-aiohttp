@@ -3,13 +3,38 @@ from json import dumps
 from uuid import uuid4
 
 from aiohttp import web
-from aiohttp.web_exceptions import HTTPNotFound
+from aiohttp.web_exceptions import (
+    HTTPNotFound,
+    HTTPMethodNotAllowed,
+)
 
 db = {}
 PORT = environ['PORT']
 
 
+def get_object(request):
+    uuid = request.match_info.get('uuid')
+    try:
+        return db[uuid]
+    except KeyError:
+        raise HTTPNotFound()
+
+
+def delete_object(request):
+    obj = get_object(request)
+    del db[obj['uuid']]
+
+
 class View:
+    @classmethod
+    async def dispatch(cls, request):
+        method = getattr(cls, request.method.lower())
+
+        if not method:
+            return HTTPMethodNotAllowed()
+
+        return await method(request)
+
     async def options(request):
         return web.Response(body=b'')
 
@@ -38,28 +63,17 @@ class IndexView(View):
 
 class TodoView(View):
     async def get(request):
-        uuid = request.match_info.get('uuid')
-        try:
-            content = db[uuid]
-            return web.Response(body=dumps(content).encode())
-        except KeyError:
-            return HTTPNotFound()
+        obj = get_object(request)
+        return web.Response(body=dumps(obj).encode())
 
     async def patch(request):
-        uuid = request.match_info.get('uuid')
-        try:
-            todo = db[uuid]
-        except KeyError:
-            return HTTPNotFound()
+        obj = get_object(request)
 
         content = await request.json()
-        todo.update(content)
-        return web.Response(body=dumps(todo).encode())
+        obj.update(content)
+
+        return web.Response(body=dumps(obj).encode())
 
     async def delete(request):
-        uuid = request.match_info.get('uuid')
-        try:
-            del db[uuid]
-        except KeyError:
-            return HTTPNotFound()
+        delete_object(request)
         return web.Response(body=b'')

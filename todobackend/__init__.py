@@ -18,16 +18,9 @@ async def init(loop):
     app = web.Application(loop=loop, middlewares=[cors_middleware_factory])
 
     # Routes
-    app.router.add_route('GET', '/', IndexView.get)
-    app.router.add_route('POST', '/', IndexView.post)
-    app.router.add_route('PUT', '/', IndexView.put)
-    app.router.add_route('DELETE', '/', IndexView.delete)
-    app.router.add_route('OPTIONS', '/', IndexView.options)
+    app.router.add_route('*', '/', IndexView.dispatch)
 
-    app.router.add_route('GET', '/{uuid}', TodoView.get)
-    app.router.add_route('PATCH', '/{uuid}', TodoView.patch)
-    app.router.add_route('DELETE', '/{uuid}', TodoView.delete)
-    app.router.add_route('OPTIONS', '/{uuid}', TodoView.options)
+    app.router.add_route('*', '/{uuid}', TodoView.dispatch)
 
     # Config
     logger.info("Starting server at %s:%s", IP, PORT)
