@@ -38,6 +38,7 @@ async def cors_middleware_factory(app, handler):
         resp = await handler(request)
         resp.headers.update({
             'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
         })
         return resp
     return middleware
