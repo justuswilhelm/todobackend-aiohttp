@@ -19,6 +19,7 @@ async def init(loop):
 
     # Routes
     app.router.add_route('GET', '/', handle)
+    app.router.add_route('OPTIONS', '/', handle)
 
     handler = app.make_handler()
 
