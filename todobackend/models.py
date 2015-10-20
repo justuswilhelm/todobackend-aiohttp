@@ -10,11 +10,10 @@ class Task:
     def create_object(cls, content):
         uuid = str(uuid4())
         HOST = environ['HOST']
-        PORT = environ['PORT']
         obj = {
             'uuid': uuid,
             'completed': False,
-            'url': 'http://{HOST}:{PORT}/{uuid}'.format(
+            'url': 'http://{HOST}/{uuid}'.format(
                 **locals())
         }
         obj.update(content)
