@@ -1,6 +1,25 @@
+from os import environ
+from uuid import uuid4
+
+
 class Task:
 
     db = {}
+
+    @classmethod
+    def create_object(cls, content):
+        uuid = str(uuid4())
+        HOST = 'localhost'
+        PORT = environ['PORT']
+        obj = {
+            'uuid': uuid,
+            'completed': False,
+            'url': 'http://{HOST}:{PORT}/{uuid}'.format(
+                **locals())
+        }
+        obj.update(content)
+        cls.set_object(uuid, obj)
+        return obj
 
     @classmethod
     def all_objects(cls):
@@ -24,4 +43,6 @@ class Task:
 
     @classmethod
     def update_object(cls, uuid, value):
-        cls.db[uuid].update(value)
+        obj = cls.db[uuid]
+        obj.update(value)
+        return obj

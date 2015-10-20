@@ -1,7 +1,5 @@
 from json import dumps
 from logging import getLogger
-from os import environ
-from uuid import uuid4
 
 from aiohttp.web import Response
 from aiohttp.web_exceptions import HTTPMethodNotAllowed
@@ -9,7 +7,6 @@ from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from .models import Task
 
 logger = getLogger(__name__)
-PORT = environ['PORT']
 
 
 class JSONResponse(Response):
@@ -20,7 +17,8 @@ class JSONResponse(Response):
 class View:
     @classmethod
     async def dispatch(cls, request):
-        method = getattr(cls, request.method.lower())
+        view = cls()
+        method = getattr(view, request.method.lower())
         logger.info(
             "Serving %s %s",
             request.method, request.path)
@@ -30,44 +28,37 @@ class View:
 
         return await method(request)
 
-    async def options(request):
+    @classmethod
+    async def options(self, request):
         return Response()
 
 
 class IndexView(View):
-    async def get(request):
+    async def get(self, request):
         return JSONResponse(Task.all_objects())
 
-    async def post(request):
+    async def post(self, request):
         content = await request.json()
-        uuid = str(uuid4())
-        content['uuid'] = uuid
-        content['completed'] = False
-        content['url'] = 'http://localhost:{}/{}'.format(PORT, uuid)
-        Task.set_object(uuid, content)
-        return JSONResponse(content)
+        return JSONResponse(
+            Task.create_object(content)
+        )
 
-    async def delete(request):
+    async def delete(self, request):
         Task.delete_all_objects()
         return Response()
 
 
 class TodoView(View):
-    async def get(request):
+    async def get(self, request):
         uuid = request.match_info.get('uuid')
-        obj = Task.get_object(uuid)
-        return JSONResponse(obj)
+        return JSONResponse(Task.get_object(uuid))
 
-    async def patch(request):
+    async def patch(self, request):
         uuid = request.match_info.get('uuid')
-        obj = Task.get_object(uuid)
-
         content = await request.json()
-        obj.update(content)
+        return JSONResponse(Task.update_object(uuid, content))
 
-        return JSONResponse(obj)
-
-    async def delete(request):
+    async def delete(self, request):
         uuid = request.match_info.get('uuid')
         Task.delete_object(uuid)
         return Response()
