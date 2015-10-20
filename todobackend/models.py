@@ -9,7 +9,7 @@ class Task:
     @classmethod
     def create_object(cls, content):
         uuid = str(uuid4())
-        HOST = 'localhost'
+        HOST = environ['HOST']
         PORT = environ['PORT']
         obj = {
             'uuid': uuid,
