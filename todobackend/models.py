@@ -1,4 +1,4 @@
-from os import environ
+from os import getenv
 from uuid import uuid4
 
 
@@ -9,7 +9,7 @@ class Task:
     @classmethod
     def create_object(cls, content):
         uuid = str(uuid4())
-        HOST = environ['HOST']
+        HOST = getenv('HOST', 'localhost:8000')
         obj = {
             'uuid': uuid,
             'completed': False,

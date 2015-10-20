@@ -1,5 +1,5 @@
 from logging import getLogger, basicConfig, INFO
-from os import environ
+from os import getenv
 from aiohttp import web
 
 from .middleware import cors_middleware_factory
@@ -9,7 +9,7 @@ from .views import (
 )
 
 IP = '0.0.0.0'
-PORT = environ['PORT']
+PORT = getenv('PORT', '8000')
 
 basicConfig(level=INFO)
 logger = getLogger(__name__)
