@@ -3,26 +3,11 @@ from json import dumps
 from uuid import uuid4
 
 from aiohttp import web
-from aiohttp.web_exceptions import (
-    HTTPNotFound,
-    HTTPMethodNotAllowed,
-)
+from aiohttp.web_exceptions import HTTPMethodNotAllowed
 
-db = {}
+from .models import Task
+
 PORT = environ['PORT']
-
-
-def get_object(request):
-    uuid = request.match_info.get('uuid')
-    try:
-        return db[uuid]
-    except KeyError:
-        raise HTTPNotFound()
-
-
-def delete_object(request):
-    obj = get_object(request)
-    del db[obj['uuid']]
 
 
 class View:
@@ -41,7 +26,9 @@ class View:
 
 class IndexView(View):
     async def get(request):
-        return web.Response(body=dumps(list(db.values())).encode())
+        return web.Response(body=dumps(
+            Task.all_objects()
+        ).encode())
 
     async def post(request):
         content = await request.json()
@@ -49,25 +36,26 @@ class IndexView(View):
         content['uuid'] = uuid
         content['completed'] = False
         content['url'] = 'http://localhost:{}/{}'.format(PORT, uuid)
-        db[uuid] = content
+        Task.set_object(uuid, content)
         return web.Response(body=dumps(content).encode())
 
     async def put(request):
         return web.Response(body=b'')
 
     async def delete(request):
-        global db
-        db = {}
+        Task.delete_all_objects()
         return web.Response(body=b'')
 
 
 class TodoView(View):
     async def get(request):
-        obj = get_object(request)
+        uuid = request.match_info.get('uuid')
+        obj = Task.get_object(uuid)
         return web.Response(body=dumps(obj).encode())
 
     async def patch(request):
-        obj = get_object(request)
+        uuid = request.match_info.get('uuid')
+        obj = Task.get_object(uuid)
 
         content = await request.json()
         obj.update(content)
@@ -75,5 +63,6 @@ class TodoView(View):
         return web.Response(body=dumps(obj).encode())
 
     async def delete(request):
-        delete_object(request)
+        uuid = request.match_info.get('uuid')
+        Task.delete_object(uuid)
         return web.Response(body=b'')
