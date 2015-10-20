@@ -1,5 +1,6 @@
 machine:
   environment:
+    HOST: localhost
     SECRET_KEY: CI
   python:
     version: 3.5.0
