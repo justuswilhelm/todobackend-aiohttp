@@ -8,7 +8,7 @@ from .views import (
     TodoView,
 )
 
-IP = '0.0.0.0'
+IP = getenv('IP', '0.0.0.0')
 PORT = getenv('PORT', '8000')
 
 basicConfig(level=INFO)
